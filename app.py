@@ -10,8 +10,8 @@ warnings.filterwarnings("ignore")
 # API KEYS
 # -----------------------------
 
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-TAVILY_API_KEY = st.secrets["TAVILY_API_KEY"]
+GOOGLE_API_KEY = ["GOOGLE_API_KEY"]
+TAVILY_API_KEY = ["TAVILY_API_KEY"]
 
 # -----------------------------
 # MODEL CREATION
