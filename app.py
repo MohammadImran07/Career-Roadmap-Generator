@@ -85,7 +85,7 @@ if st.button("Generate Roadmap"):
         st.warning("⚠️ Please enter your **Google Gemini API Key** in the sidebar to proceed.")
         st.stop()
         
-    # Updated: Now accepts both legacy 'AIza' keys and the new secure 'AQ' format
+    # Accepts both legacy 'AIza' keys and the newer 'AQ' format
     if not (clean_google_key.startswith("AIza") or clean_google_key.startswith("AQ")):
         st.error("❌ Invalid Google API Key format. Gemini API keys must start with 'AIza' or 'AQ'. Please check your key at https://aistudio.google.com/app/apikey")
         st.stop()
@@ -100,10 +100,9 @@ if st.button("Generate Roadmap"):
 
     with st.spinner("Initializing AI Agent & Generating Roadmap..."):
         try:
-            # 3. Instantiate Gemini Model with gemini-3.5-flash-lite
-            # Using 'api_key' explicitly to prevent OAuth conflicts
+            # 3. Instantiate Gemini Model with gemini-1.5-flash
             model = ChatGoogleGenerativeAI(
-                model='gemini-3.5-flash-lite',
+                model='gemini-1.5-flash',
                 api_key=clean_google_key, 
                 temperature=0.7
             )
