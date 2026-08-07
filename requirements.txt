@@ -5,3 +5,4 @@ langchain-groq
 tavily-python
 pandas
 numpy
+google-genai
