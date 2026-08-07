@@ -1,12 +1,10 @@
 import os
+import traceback
 import warnings
 import streamlit as st
-from google import genai
-from google.genai import types
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
-from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, HumanMessage
 from tavily import TavilyClient
 
 warnings.filterwarnings("ignore")
@@ -79,9 +77,11 @@ hours = st.slider(
 # -----------------------------
 if st.button("Generate Roadmap"):
     
+    # Clean the keys
     clean_google_key = google_api_key.strip().strip("'").strip('"')
     clean_tavily_key = tavily_api_key.strip().strip("'").strip('"')
 
+    # Validate Keys before running
     if not clean_google_key:
         st.warning("⚠️ Please enter your **Google Gemini API Key** in the sidebar to proceed.")
         st.stop()
@@ -90,55 +90,30 @@ if st.button("Generate Roadmap"):
         st.warning("⚠️ Please enter your **Tavily API Key** in the sidebar to proceed.")
         st.stop()
 
+    # Clear conflicting environment parameters that cause OAuth triggers
+    for env_var in ["GOOGLE_GENAI_USE_VERTEXAI", "GOOGLE_CLOUD_PROJECT", "GOOGLE_APPLICATION_CREDENTIALS"]:
+        if env_var in os.environ:
+            del os.environ[env_var]
+
     os.environ["TAVILY_API_KEY"] = clean_tavily_key
+    os.environ["GOOGLE_API_KEY"] = clean_google_key
 
     with st.spinner("Initializing AI Agent & Generating Roadmap..."):
         try:
-            # Initialize Google's official modern client (Guaranteed to accept AI Studio API keys natively)
-            client = genai.Client(api_key=clean_google_key)
+            # Instantiate Model using the stable gemini-2.5-flash endpoint and explicit API key routing
+            model = ChatGoogleGenerativeAI(
+                model="gemini-2.5-flash",
+                google_api_key=clean_google_key,
+                temperature=0.7
+            )
 
             # Define Custom Tool with User's Tavily Key
             @tool
             def search_career_info(search_query: str) -> str:
                 """Fetch latest career information, certifications, and job trends."""
-                tavily_client = TavilyClient(api_key=clean_tavily_key)
-                response = tavily_client.search(search_query)
+                client = TavilyClient(api_key=clean_tavily_key)
+                response = client.search(search_query)
                 return str(response)
-
-            # Custom lightweight wrapper to bridge Google's native client with LangGraph ReAct agent
-            class NativeGeminiChat(BaseChatModel):
-                model_name: str = "gemini-2.5-flash"
-                api_key_val: str = clean_google_key
-
-                def _generate(self, messages, stop=None, run_manager=None, **kwargs):
-                    native_client = genai.Client(api_key=self.api_key_val)
-                    
-                    # Convert LangChain message history to text/contents for the native client
-                    formatted_contents = ""
-                    for m in messages:
-                        if isinstance(m, HumanMessage):
-                            formatted_contents += f"\n{m.content}"
-                        elif isinstance(m, AIMessage):
-                            formatted_contents += f"\n{m.content}"
-                        elif isinstance(m, str):
-                            formatted_contents += f"\n{m}"
-
-                    response = native_client.models.generate_content(
-                        model=self.model_name,
-                        contents=formatted_contents,
-                    )
-                    
-                    from langchain_core.outputs import ChatResult, ChatGeneration
-                    message = AIMessage(content=response.text)
-                    generation = ChatGeneration(message=message)
-                    return ChatResult(generations=[generation])
-
-                @property
-                def _llm_type(self) -> str:
-                    return "native-gemini"
-
-            # Instantiate model wrapper using a verified stable model
-            model = NativeGeminiChat(model_name="gemini-2.5-flash")
 
             # Create Agent
             agent = create_react_agent(
@@ -180,8 +155,11 @@ Format the response professionally using markdown.
 
             roadmap_result = response["messages"][-1].content
 
+            # Render Output
             st.success("Roadmap Generated Successfully!")
             st.markdown(roadmap_result)
 
         except Exception as e:
-            st.error(f"❌ An error occurred: {e}")
+            # This will now display the exact python traceback trace so we see where it fails
+            st.error("❌ An error occurred:")
+            st.code(traceback.format_exc())
