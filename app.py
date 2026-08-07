@@ -26,7 +26,7 @@ with st.sidebar:
     google_api_key = st.text_input(
         "Google Gemini API Key",
         type="password",
-        placeholder="AIzaSy...",
+        placeholder="AIza... or AQ...",
         help="Get your key at https://aistudio.google.com/app/apikey"
     )
     
@@ -85,8 +85,9 @@ if st.button("Generate Roadmap"):
         st.warning("⚠️ Please enter your **Google Gemini API Key** in the sidebar to proceed.")
         st.stop()
         
-    if not clean_google_key.startswith("AIzaSy"):
-        st.error("❌ Invalid Google API Key format. Gemini API keys must start with 'AIzaSy'. Please check your key at https://aistudio.google.com/app/apikey")
+    # Updated: Now accepts both legacy 'AIza' keys and the new secure 'AQ' format
+    if not (clean_google_key.startswith("AIza") or clean_google_key.startswith("AQ")):
+        st.error("❌ Invalid Google API Key format. Gemini API keys must start with 'AIza' or 'AQ'. Please check your key at https://aistudio.google.com/app/apikey")
         st.stop()
 
     if not clean_tavily_key:
