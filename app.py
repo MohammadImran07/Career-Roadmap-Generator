@@ -1,27 +1,32 @@
-import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
+import langchain
 from langchain.agents import create_agent
+import langchain_community
 from tavily import TavilyClient
+import pytesseract as pyt
+import streamlit as st
+import os
+import time
+from PIL import Image
+import pandas as pd
+import numpy as np
 import warnings
 
 warnings.filterwarnings("ignore")
 
-# -----------------------------
-# API KEYS
-# -----------------------------
-
-GOOGLE_API_KEY = ["GOOGLE_API_KEY"]
-TAVILY_API_KEY = ["TAVILY_API_KEY"]
-
-# -----------------------------
-# MODEL CREATION
-# -----------------------------
+# Step 3 API Keys
+GOOGLE_API_KEY = 'AQ.Ab8RN6L7pW7EUP8QcQ7wXF1IoOfj89hPmEJcGetpsqNQZnQfkQ'
+GROQ_API_KEY = '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'
+TAVILY_API_KEY = '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'
 
 model = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=GOOGLE_API_KEY
+    model = 'gemini-3.5-flash-lite',
+    google_api_key = GOOGLE_API_KEY
 )
 
+response = model.invoke("Hello Buddy!")
+response.content[-1]['text']
 # -----------------------------
 # TOOL CREATION
 # -----------------------------
