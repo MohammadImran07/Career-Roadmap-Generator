@@ -17,7 +17,7 @@ GROQ_API_KEY = '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'
 TAVILY_API_KEY = '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'
 
 model = ChatGoogleGenerativeAI(
-    model = 'gemini-3.5-flash-lite',
+    model = 'gemini-2.5-flash',
     google_api_key = GOOGLE_API_KEY
 )
 
