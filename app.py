@@ -11,6 +11,7 @@ warnings.filterwarnings("ignore")
 # ==========================================
 # AUTHENTICATION FIX (PREVENTS 401 ERROR)
 # ==========================================
+# Blocks LangChain from attempting to use Vertex AI OAuth credentials
 if "GOOGLE_GENAI_USE_VERTEXAI" in os.environ:
     del os.environ["GOOGLE_GENAI_USE_VERTEXAI"]
 if "GOOGLE_CLOUD_PROJECT" in os.environ:
@@ -108,25 +109,65 @@ if st.button("Generate Roadmap"):
     with st.spinner("Initializing AI Agent & Generating Roadmap..."):
         try:
             # 3. Instantiate Gemini Model
-            # THE FIX: transport="rest" forces HTTP instead of gRPC, preventing header stripping
+            # transport="rest" forces HTTP instead of gRPC, preventing header stripping.
             model = ChatGoogleGenerativeAI(
                 model='gemini-3.5-flash',
                 api_key=clean_google_key, 
                 temperature=0.7,
-                transport="rest"  # <--- THIS IS THE MAGIC LINE
+                transport="rest"  
             )
 
             # 4. Define Custom Tool with User's Tavily Key
             @tool
             def search_career_info(search_query: str) -> str:
                 """Fetch latest career information, certifications, and job trends."""
-                client = TavilyClient(api_key=clean_tavilyThis specific **401 UNAUTHENTICATED (`ACCESS_TOKEN_TYPE_UNSUPPORTED`)** error is caused by a major change Google made to their API keys recently. 
+                client = TavilyClient(api_key=clean_tavily_key)
+                response = client.search(search_query)
+                return str(response)
 
-Google AI Studio recently stopped issuing the old `AIza...` API keys and started issuing new, more secure keys that start with **`AQ.`**. Older versions of LangChain and Google's Python SDK do not recognize the `AQ.` format properly. As a result, instead of passing it as an API key, LangChain accidentally sends it as an Enterprise OAuth Bearer token—which Google's servers immediately reject.
+            # 5. Create Agent
+            agent = create_react_agent(
+                model=model,
+                tools=[search_career_info]
+            )
 
-To fix this, you must do two things: update your packages to the latest versions that support `AQ.` keys, and use the `transport="rest"` fix to prevent header stripping.
+            # 6. Construct Prompt & Run
+            prompt_query = f"""
+You are an Expert Career Counselor.
 
-### Step 1: Run this command in your terminal
-You **must** update these packages, or the new `AQ.` key will continue to fail:
-```bash
-pip install -U langchain-google-genai google-generativeai google-genai
+Generate a professional roadmap with emojis, headings, tables, and bullet points.
+
+Student Details:
+Name: {name}
+Education: {education}
+Current Skills: {skills}
+Career Goal: {career_goal}
+Weekly Study Hours: {hours}
+
+Provide the following sections:
+🎯 Career Goal
+🛠 Required Skills
+📚 Certifications
+📖 Learning Resources
+💻 Recommended Projects
+📅 3 Month Plan
+📅 6 Month Plan
+📅 1 Year Plan
+💰 Expected Salary
+🚀 Future Scope
+
+Format the response professionally using markdown.
+"""
+
+            response = agent.invoke(
+                {"messages": [{"role": "user", "content": prompt_query}]}
+            )
+
+            roadmap_result = response["messages"][-1].content
+
+            # 7. Render Output
+            st.success("Roadmap Generated Successfully!")
+            st.markdown(roadmap_result)
+
+        except Exception as e:
+            st.error(f"❌ An error occurred: {e}")
