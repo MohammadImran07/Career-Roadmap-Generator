@@ -21,8 +21,7 @@ model = ChatGoogleGenerativeAI(
     google_api_key = GOOGLE_API_KEY
 )
 
-response = model.invoke("Hello Buddy!")
-response.content[-1]['text']
+
 # -----------------------------
 # TOOL CREATION
 # -----------------------------
