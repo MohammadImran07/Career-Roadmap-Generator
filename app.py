@@ -110,9 +110,9 @@ if st.button("Generate Roadmap"):
     with st.spinner("Initializing AI Agent & Generating Roadmap..."):
         try:
             # 3. Instantiate Gemini Model
-            # Using 'gemini-1.5-flash' along with the environment wipe above ensures no 401 error.
+            # UPDATED: Using 'gemini-3.5-flash' for faster, frontier-level agentic logic
             model = ChatGoogleGenerativeAI(
-                model='gemini-1.5-flash',
+                model='gemini-3.5-flash',
                 google_api_key=clean_google_key, 
                 temperature=0.7
             )
