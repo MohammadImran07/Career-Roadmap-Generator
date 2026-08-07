@@ -53,7 +53,7 @@ agent = create_agent(
 # MAIN AGENT
 # -----------------------------
 
-def main_agent(agent, query):
+def main_agent(agent,_query):
 
     prompt = f"""
 You are an Expert Career Counselor.
