@@ -43,7 +43,7 @@ with st.sidebar:
     )
 
 st.title("🚀 AI Career Roadmap Planner")
-st.markdown("Generate a personalized career roadmap using Native Google GenAI.")
+st.markdown("Generate a personalized career roadmap using Google Gemini 3.5 Flash-Lite.")
 
 # -----------------------------
 # MAIN APP INPUTS
@@ -89,7 +89,7 @@ if st.button("Generate Roadmap"):
 
     with st.spinner("Searching trends & generating custom career roadmap..."):
         try:
-            # 1. Initialize Google's official native client directly (bypasses LangChain/Vertex routing bugs)
+            # 1. Initialize Google's official native client directly
             client = genai.Client(api_key=clean_google_key)
 
             # 2. Optional Tavily live search context injection
@@ -97,7 +97,7 @@ if st.button("Generate Roadmap"):
             if clean_tavily_key:
                 try:
                     tavily = TavilyClient(api_key=clean_tavily_key)
-                    search_response = tavily.search(query=f"latest industry requirements and roadmap for {career_goal} 2026")
+                    search_response = tavily.search(query=f"latest industry requirements and roadmap for {career_goal}")
                     extra_search_context = f"\n\nLive Web Search Data:\n{str(search_response)}"
                 except Exception:
                     pass
@@ -132,9 +132,9 @@ Please provide the following exact sections:
 Format the response cleanly using markdown.
 """
 
-            # 4. Directly invoke the native Google Generative Model
+            # 4. Directly invoke gemini-3.5-flash-lite
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-3.5-flash-lite',
                 contents=prompt_query
             )
 
