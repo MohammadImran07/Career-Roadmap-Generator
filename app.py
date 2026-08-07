@@ -1,3 +1,76 @@
+import os
+import warnings
+import streamlit as st
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.tools import tool
+from langgraph.prebuilt import create_react_agent
+from tavily import TavilyClient
+
+warnings.filterwarnings("ignore")
+
+# -----------------------------
+# STREAMLIT UI CONFIGURATION
+# -----------------------------
+st.set_page_config(
+    page_title="AI Career Roadmap Planner",
+    page_icon="🚀",
+    layout="wide"
+)
+
+# -----------------------------
+# SIDEBAR: API KEY INPUTS
+# -----------------------------
+with st.sidebar:
+    st.header("🔑 API Configuration")
+    
+    google_api_key = st.text_input(
+        "Google Gemini API Key",
+        type="password",
+        placeholder="AIzaSy...",
+        help="Get your key at https://aistudio.google.com/app/apikey"
+    )
+    
+    tavily_api_key = st.text_input(
+        "Tavily API Key",
+        type="password",
+        placeholder="tvly-...",
+        help="Get your key at https://tavily.com/"
+    )
+    
+    st.markdown("---")
+    st.markdown(
+        "ℹ️ **Note:** Your API keys are used only for your current session "
+        "and are never saved or logged."
+    )
+
+st.title("🚀 AI Career Roadmap Planner")
+st.markdown("Generate a personalized career roadmap using Agentic AI.")
+
+# -----------------------------
+# MAIN APP INPUTS
+# -----------------------------
+name = st.text_input("👤 Name")
+
+education = st.selectbox(
+    "🎓 Education",
+    ["BCA", "B.Tech", "B.Sc", "MCA", "MBA", "Other"]
+)
+
+skills = st.text_area(
+    "🛠 Current Skills",
+    placeholder="Python, HTML, CSS..."
+)
+
+career_goal = st.text_input(
+    "🎯 Career Goal",
+    placeholder="AI Engineer"
+)
+
+hours = st.slider(
+    "📚 Study Hours Per Week",
+    1, 40, 10
+)
+
 # -----------------------------
 # GENERATION LOGIC
 # -----------------------------
@@ -26,10 +99,10 @@ if st.button("Generate Roadmap"):
 
     with st.spinner("Initializing AI Agent & Generating Roadmap..."):
         try:
-            # 3. Instantiate Gemini Model
-            # Note: Using 'api_key' parameter explicitly instead of 'google_api_key'
+            # 3. Instantiate Gemini Model with gemini-3.5-flash-lite
+            # Using 'api_key' explicitly to prevent OAuth conflicts
             model = ChatGoogleGenerativeAI(
-                model='gemini-1.5-flash',
+                model='gemini-3.5-flash-lite',
                 api_key=clean_google_key, 
                 temperature=0.7
             )
