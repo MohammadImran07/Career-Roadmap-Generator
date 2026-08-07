@@ -12,12 +12,12 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # Step 3 API Keys
-GOOGLE_API_KEY = 'AQ.Ab8RN6L7pW7EUP8QcQ7wXF1IoOfj89hPmEJcGetpsqNQZnQfkQ'
+GOOGLE_API_KEY = 'AQ.Ab8RN6IP2UDeVTDB9670xfJFYrdj6mQSwENvJidevDuWhtseXg'
 GROQ_API_KEY = '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'
 TAVILY_API_KEY = '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'
 
 model = ChatGoogleGenerativeAI(
-    model = 'gemini-2.5-flash',
+    model = 'gemini-3.5-flash-lite',
     google_api_key = GOOGLE_API_KEY
 )
 
