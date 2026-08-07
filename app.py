@@ -85,25 +85,25 @@ if st.button("Generate Roadmap"):
         st.warning("⚠️ Please enter your **Google Gemini API Key** in the sidebar to proceed.")
         st.stop()
         
-    # Accepts both legacy 'AIza' keys and the newer 'AQ' format
     if not (clean_google_key.startswith("AIza") or clean_google_key.startswith("AQ")):
-        st.error("❌ Invalid Google API Key format. Gemini API keys must start with 'AIza' or 'AQ'. Please check your key at https://aistudio.google.com/app/apikey")
+        st.error("❌ Invalid Google API Key format. Gemini API keys must start with 'AIza' or 'AQ'.")
         st.stop()
 
     if not clean_tavily_key:
         st.warning("⚠️ Please enter your **Tavily API Key** in the sidebar to proceed.")
         st.stop()
 
-    # Set environment variables for current execution run
-    os.environ["GOOGLE_API_KEY"] = clean_google_key
+    # Safely set the environment variable for Tavily (Tavily relies on the env var)
     os.environ["TAVILY_API_KEY"] = clean_tavily_key
 
     with st.spinner("Initializing AI Agent & Generating Roadmap..."):
         try:
-            # 3. Instantiate Gemini Model with gemini-1.5-flash
+            # 3. Instantiate Gemini Model
+            # FIXED: Must use 'google_api_key' parameter! If you use 'api_key', 
+            # LangChain triggers the OAuth 401 error you were seeing.
             model = ChatGoogleGenerativeAI(
                 model='gemini-1.5-flash',
-                api_key=clean_google_key, 
+                google_api_key=clean_google_key, 
                 temperature=0.7
             )
 
